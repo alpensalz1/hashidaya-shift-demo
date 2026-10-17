@@ -359,11 +359,6 @@ body {
 .row.me { box-shadow: 0 0 0 1.5px currentColor inset; }
 .row-name { font-size: 12.5px; font-weight: 500; flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .row-time { font-family: var(--font-num); font-size: 11px; font-weight: 500; color: var(--muted-fg); flex: none; }
-.rank {
-  flex: none; width: 21px; height: 21px; border-radius: 5px;
-  display: grid; place-items: center;
-  font-family: var(--font-num); font-size: 10.5px; font-weight: 700;
-}
 .sh-1 { background: linear-gradient(135deg, #e3e2fb 0%, #eeedfd 100%); border-left-color: #6366f1; color: #4338ca; }
 .sh-2 { background: linear-gradient(135deg, #dcf6f0 0%, #ecfdf5 100%); border-left-color: #2dd4bf; color: #0f766e; }
 .sh-3 { background: linear-gradient(135deg, #fde9f1 0%, #fdf2f8 100%); border-left-color: #ec4899; color: #be185d; }
@@ -372,12 +367,6 @@ body {
 .t-shikomi { background: #fef3c7; color: #b45309; }
 .t-eigyo    { background: #d1fae5; color: #047857; }
 .t-closed   { background: var(--muted); color: var(--muted-fg); }
-
-.rk-S { background: #09090b; color: #fff; }
-.rk-A { background: #dbeafe; color: #1d4ed8; }
-.rk-B { background: #d1fae5; color: #047857; }
-.rk-C { background: #fef3c7; color: #b45309; }
-.rk-D { background: var(--muted); color: var(--muted-fg); }
 
 /* 日付セレクタ */
 .daystrip { display: flex; gap: 6px; }
@@ -663,7 +652,6 @@ body {
           <div class="intro-card">
             <div class="intro-logo">は</div>
             <h3>はし田屋 シフト管理</h3>
-            <p>実際に動く試作品です。出ているスタッフ名・数字はすべてダミーです。</p>
             <ul>
               <li>カレンダーの<b>日付をタップ</b>すると、その日のシフト希望を入れられます</li>
               <li>画面下の<b>「スタッフ / 店長」</b>で、スタッフが見る画面と店長が見る画面を切り替えられます</li>
@@ -699,20 +687,20 @@ const BRAND = 'はし田屋';          // ← 屋号
 const OPEN  = { shikomi: ['14:00', '17:00'], eigyo: ['17:00', '24:00'] };
 
 /* ---- 登場人物 (デモ用) ---- */
-const ME_STAFF = { name: '田中 翔太', initial: '田', type: 'アルバイト', wage: 1200, rank: 'A' };
-const ME_MGR   = { name: '佐藤 健一', initial: '佐', type: '社員',       wage: null, rank: 'S' };
+const ME_STAFF = { name: '田中 翔太', initial: '田', type: 'アルバイト', wage: 1200 };
+const ME_MGR   = { name: '高木', initial: '高', type: '社員',       wage: null };
 
 const CREW = [
-  { name: '佐藤 健一', rank: 'S', type: '社員' },
-  { name: '田中 翔太', rank: 'A', type: 'アルバイト' },
-  { name: '鈴木 美咲', rank: 'A', type: 'アルバイト' },
-  { name: '高橋 蓮',   rank: 'B', type: 'アルバイト' },
-  { name: '渡辺 さくら', rank: 'B', type: 'アルバイト' },
-  { name: '伊藤 大和', rank: 'C', type: 'アルバイト' },
-  { name: '山本 結菜', rank: 'C', type: 'アルバイト' },
-  { name: '中村 颯太', rank: 'B', type: 'アルバイト' },
-  { name: '小林 葵',   rank: 'D', type: 'アルバイト' },
-  { name: '加藤 陽向', rank: 'A', type: '社員' },
+  { name: '高木', type: '社員' },
+  { name: '田中 翔太', type: 'アルバイト' },
+  { name: '鈴木 美咲', type: 'アルバイト' },
+  { name: '高橋 蓮',   type: 'アルバイト' },
+  { name: '渡辺 さくら', type: 'アルバイト' },
+  { name: '伊藤 大和', type: 'アルバイト' },
+  { name: '山本 結菜', type: 'アルバイト' },
+  { name: '中村 颯太', type: 'アルバイト' },
+  { name: '小林 葵',   type: 'アルバイト' },
+  { name: '加藤 陽向', type: '社員' },
 ];
 
 /* ---- 今週 (日〜土) ---- */
@@ -725,27 +713,26 @@ const TODAY_DOM = 17;   // 2026-10-17 は土曜
 
 /* 確定シフト: 日 → 店舗 → 並び */
 const FIXED = {
-  11: { 1: [['佐藤 健一','14:00','24:00'],['鈴木 美咲','17:00','23:00'],['伊藤 大和','17:00','24:00']],
+  11: { 1: [['高木','14:00','24:00'],['鈴木 美咲','17:00','23:00'],['伊藤 大和','17:00','24:00']],
         2: [['加藤 陽向','14:00','24:00'],['山本 結菜','17:30','23:30']] },
-  12: { 1: [['佐藤 健一','14:00','23:00'],['田中 翔太','17:00','23:00'],['高橋 蓮','17:00','24:00']],
+  12: { 1: [['高木','14:00','23:00'],['田中 翔太','17:00','23:00'],['高橋 蓮','17:00','24:00']],
         2: [['加藤 陽向','14:00','24:00'],['中村 颯太','18:00','24:00']] },
-  13: { 1: [['佐藤 健一','14:00','24:00'],['渡辺 さくら','17:00','22:00']],
+  13: { 1: [['高木','14:00','24:00'],['渡辺 さくら','17:00','22:00']],
         3: [['小林 葵','15:00','20:00'],['山本 結菜','17:00','23:00']] },
   14: { 1: [['加藤 陽向','14:00','24:00'],['田中 翔太','17:00','24:00'],['鈴木 美咲','18:00','23:00']],
-        2: [['佐藤 健一','14:00','23:00'],['伊藤 大和','17:30','24:00']] },
-  15: { 1: [['佐藤 健一','14:00','24:00'],['中村 颯太','17:00','24:00']],
+        2: [['高木','14:00','23:00'],['伊藤 大和','17:30','24:00']] },
+  15: { 1: [['高木','14:00','24:00'],['中村 颯太','17:00','24:00']],
         2: [['加藤 陽向','14:00','24:00'],['高橋 蓮','17:00','23:30'],['小林 葵','18:00','23:00']] },
-  16: { 1: [['佐藤 健一','14:00','24:00'],['田中 翔太','17:00','24:00'],['鈴木 美咲','17:00','23:30'],['伊藤 大和','18:00','24:00']],
+  16: { 1: [['高木','14:00','24:00'],['田中 翔太','17:00','24:00'],['鈴木 美咲','17:00','23:30'],['伊藤 大和','18:00','24:00']],
         2: [['加藤 陽向','14:00','24:00'],['渡辺 さくら','17:00','23:00'],['中村 颯太','18:00','24:00']],
         3: [['山本 結菜','15:00','20:00']] },
-  17: { 1: [['佐藤 健一','14:00','24:00'],['田中 翔太','17:00','24:00'],['高橋 蓮','17:00','24:00'],['小林 葵','18:00','23:30']],
+  17: { 1: [['高木','14:00','24:00'],['田中 翔太','17:00','24:00'],['高橋 蓮','17:00','24:00'],['小林 葵','18:00','23:30']],
         2: [['加藤 陽向','14:00','24:00'],['鈴木 美咲','17:00','24:00'],['伊藤 大和','17:30','24:00']],
         3: [['渡辺 さくら','15:00','20:00']] },
 };
 
 /* ---- 申請対象期間: 11/1〜11/15 (締切 10/20) ---- */
 const PERIOD = { label: '11月 前半', from: 1, to: 15, deadlineDom: 20, startDow: 0 }; // 11/1 は日曜
-const rankOf = n => (CREW.find(c => c.name === n) || {}).rank || 'D';
 const typeOf = n => (CREW.find(c => c.name === n) || {}).type || 'アルバイト';
 
 /* ---- 可変状態 ---- */
@@ -838,7 +825,6 @@ function viewHome() {
       const isMe = n === myName;
       const kind = s < '17:00' ? 'shikomi' : 'eigyo';
       return `<div class="row${isMe ? ' me' : ''}">
-        <span class="rank rk-${rankOf(n)}">${rankOf(n)}</span>
         <span class="row-name">${esc(n)}${isMe ? '（自分）' : ''}</span>
         <span class="pill t-${kind}">${kind === 'shikomi' ? '仕込み' : '営業'}</span>
         <span class="row-time">${hhmm(s)}–${hhmm(e)}</span>
@@ -1022,7 +1008,6 @@ function viewManage() {
       const idx = pending.indexOf(p);
       return `<div class="req">
         <div class="req-top">
-          <span class="rank rk-${rankOf(p.name)}">${rankOf(p.name)}</span>
           <span class="req-name">${esc(p.name)}</span>
           <span class="pill ${sh.cls}" style="border:0">${esc(sh.name)}</span>
         </div>
@@ -1086,7 +1071,6 @@ function viewAdmin() {
     </div>`).join('')}</div></div>
     <p class="sec-label">スタッフ（${CREW.length}名）</p>
     <div class="card">${CREW.map(c => `<div class="listrow">
-      <span class="rank rk-${c.rank}" style="margin-right:2px">${c.rank}</span>
       <span class="lmain">${esc(c.name)}<span class="lsub">${c.type}${c.type === 'アルバイト' ? ' ・ 時給 1,150〜1,300円' : ''}</span></span>
       <span class="lv num">${c.type === 'アルバイト' ? (90 + c.name.length * 7) + 'h' : '—'}</span>
     </div>`).join('')}</div>
@@ -1259,8 +1243,8 @@ function bindLogin() {
 
 /* 役割切替 */
 const ROLE_NOTE = {
-  staff: '田中 翔太さん（アルバイト・ランクA・時給1,200円）として見ています。タブは ホーム / シフト申請 / 履歴 / 給与概算 の4つ。',
-  mgr: '佐藤 健一さん（社員・店長）として見ています。シフト管理と管理タブが増えます。希望カードの「確定」を押すと充足率が動きます。',
+  staff: '田中 翔太さん（アルバイト・時給1,200円）として見ています。タブは ホーム / シフト申請 / 履歴 / 給与概算 の4つ。',
+  mgr: '高木さん（社員・店長）として見ています。シフト管理と管理タブが増えます。希望カードの「確定」を押すと充足率が動きます。',
 };
 function setRole(r) {
   role = r;
