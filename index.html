@@ -318,6 +318,7 @@ body {
   display: inline-flex; align-items: center; gap: 4px;
   padding: 2px 8px; border-radius: 999px;
   font-size: 10.5px; font-weight: 700; line-height: 1.5;
+  white-space: nowrap;
 }
 .btn {
   appearance: none; border: 0; cursor: pointer;
@@ -366,6 +367,7 @@ body {
 
 .t-shikomi { background: #fef3c7; color: #b45309; }
 .t-eigyo    { background: #d1fae5; color: #047857; }
+.t-both     { background: linear-gradient(100deg, #fef3c7 0%, #fef3c7 47%, #d1fae5 53%, #d1fae5 100%); color: #3f3f46; }
 .t-closed   { background: var(--muted); color: var(--muted-fg); }
 
 /* 日付セレクタ */
@@ -681,7 +683,7 @@ const BRAND = 'はし田屋';          // ← 屋号
 const OPEN  = { shikomi: ['14:00', '17:00'], eigyo: ['17:00', '24:00'] };
 
 /* ---- 登場人物 (デモ用) ---- */
-const ME_STAFF = { name: '田中 翔太', initial: '田', type: 'アルバイト', wage: 1200 };
+const ME_STAFF = { name: '田中 翔太', initial: '田', type: 'アルバイト', wage: 1300 };
 const ME_MGR   = { name: '高木', initial: '高', type: '社員',       wage: null };
 
 const CREW = [
@@ -761,6 +763,15 @@ const hoursOf = (s, e) => {
   const [sh, sm] = s.split(':').map(Number), [eh, em] = e.split(':').map(Number);
   return ((eh * 60 + em) - (sh * 60 + sm)) / 60;
 };
+
+/* 仕込み(開店前)と営業(17:00〜)のどちらに掛かるかで表示を決める。
+   14:00-23:00 のように境界をまたぐ場合は「仕込み・営業」。 */
+function shiftKind(s, e) {
+  const B = OPEN.eigyo[0];                       // 営業開始 = 仕込みとの境界
+  if (s >= B) return { cls: 'eigyo',   label: '営業' };
+  if (e <= B) return { cls: 'shikomi', label: '仕込み' };
+  return { cls: 'both', label: '仕込み・営業' };
+}
 const yen = (n) => n.toLocaleString('ja-JP');
 const me = () => (role === 'mgr' ? ME_MGR : ME_STAFF);
 
@@ -817,10 +828,10 @@ function viewHome() {
     const names = new Set(rows.map(r => r[0]));
     const body = rows.map(([n, s, e]) => {
       const isMe = n === myName;
-      const kind = s < '17:00' ? 'shikomi' : 'eigyo';
+      const kind = shiftKind(s, e);
       return `<div class="row${isMe ? ' me' : ''}">
         <span class="row-name">${esc(n)}${isMe ? '（自分）' : ''}</span>
-        <span class="pill t-${kind}">${kind === 'shikomi' ? '仕込み' : '営業'}</span>
+        <span class="pill t-${kind.cls}">${kind.label}</span>
         <span class="row-time">${hhmm(s)}–${hhmm(e)}</span>
       </div>`;
     }).join('');
@@ -873,7 +884,7 @@ function viewShifts() {
         <span class="ld">11/${d}</span>
         <span class="lmain"><span class="num" style="font-size:12.5px;font-weight:700">${wish[d].s}–${wish[d].e}</span>
         <span class="lsub">${hoursOf(wish[d].s, wish[d].e)}時間</span></span>
-        <span class="pill t-${wish[d].s < '17:00' ? 'shikomi' : 'eigyo'}">${wish[d].s < '17:00' ? '仕込みから' : '営業から'}</span>
+        <span class="pill t-${shiftKind(wish[d].s, wish[d].e).cls}">${shiftKind(wish[d].s, wish[d].e).label}</span>
       </div>`).join('')}</div>
       <button class="btn btn-ghost" id="redo">出し直す</button>
     </div>`;
@@ -1065,7 +1076,7 @@ function viewAdmin() {
     </div>`).join('')}</div></div>
     <p class="sec-label">スタッフ（${CREW.length}名）</p>
     <div class="card">${CREW.map(c => `<div class="listrow">
-      <span class="lmain">${esc(c.name)}<span class="lsub">${c.type}${c.type === 'アルバイト' ? ' ・ 時給 1,150〜1,300円' : ''}</span></span>
+      <span class="lmain">${esc(c.name)}<span class="lsub">${c.type}${c.type === 'アルバイト' ? ' ・ 時給 1,300円' : ''}</span></span>
       <span class="lv num">${c.type === 'アルバイト' ? (90 + c.name.length * 7) + 'h' : '—'}</span>
     </div>`).join('')}</div>
     <p style="font-size:10.5px;color:var(--muted-fg);line-height:1.7;margin:0">確定シフトから自動集計。月末に電卓を叩く作業がなくなります。</p>
@@ -1237,7 +1248,7 @@ function bindLogin() {
 
 /* 役割切替 */
 const ROLE_NOTE = {
-  staff: '田中 翔太さん（アルバイト・時給1,200円）として見ています。タブは ホーム / シフト申請 / 履歴 / 給与概算 の4つ。',
+  staff: '田中 翔太さん（アルバイト・時給1,300円）として見ています。タブは ホーム / シフト申請 / 履歴 / 給与概算 の4つ。',
   mgr: '高木さん（社員・店長）として見ています。シフト管理と管理タブが増えます。希望カードの「確定」を押すと充足率が動きます。',
 };
 function setRole(r) {
